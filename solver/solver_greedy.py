@@ -10,7 +10,7 @@ from common import print_tour, read_input
 
 # cities: 座標のリスト
 # 座標のindexで表した、訪れる順番リスト（[0, 4, 2, ...]なら、0番目の座標からスタート、４番目→２番目...と進むということ
-def solve(cities):
+def solve_greedy(cities):
 
      
     # start, goalは(x, y)の座標
@@ -52,5 +52,5 @@ def solve(cities):
 
 if __name__ == '__main__':
     assert len(sys.argv) > 1
-    tour = solve(read_input(sys.argv[1]))
+    tour = solve_greedy(read_input(sys.argv[1]))
     print_tour(tour)
