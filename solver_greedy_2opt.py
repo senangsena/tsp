@@ -56,10 +56,44 @@ def solve_greedy_2opt(cities):
 
         return order, distances
     
+    # a_start, a_goal, b_start, b_goalは座標
+    # a_start -> a_goal の線と b_start -> b_goal の線が交差するか判定
+    # 方針：a_start -> a_goalの線分を考え、b_start、b_goalがどっち側にあるかをeval_start, eval_doalの正負で評価
+    def isCross(a_start, a_goal, b_start, b_goal) -> bool:
+
+        # a_start -> a_goalの線文が満たす、方程式 y = ax + bの係数a, bを求める
+        # a_startのx座標 == a_goalのx座標　の時、傾き存在しないので別枠で考える
+        if a_start[0] == a_goal[0]:
+            eval_start = b_start[0] - a_start[0]
+            eval_goal = b_goal[0] - a_start[0]
+
+        else:
+            a = (a_start[1] - a_goal[1]) / (a_start[0] - a_goal[0])
+            b = (a_start[0]*a_goal[1] - a_start[1]*a_goal[0]) / (a_start[0] - a_goal[0])
+
+            # y - ax - bの正負で評価
+            eval_start = b_start[1] - a * b_start[0] - b
+            eval_goal = b_goal[1] - a * b_goal[0] - b
+
+        if eval_start * eval_goal <= 0:
+            return True
+        else:
+            return False
+
+    
     # ここがメイン
+    # greedyの欠点は、残り少なくなってきた終盤で、大きくジャンプをしてしまい別の移動経路と交差すること。
     greedy_result, distances = greedy(cities)
     print(greedy_result, distances)
     sorted_distances = dict(sorted(distances.items(), key = lambda item:item[1], reverse = True))
+
+    # 全ての経路について交差を判定し付け替えをするのは計算量が膨大(最悪計算量O(N^2)?)
+    # そこで上位から見ていき、交差しない経路を見つけたらそこで交差探索を終了する(これも計算量自体はO(N^2)?)
+    
+    for id in sorted_distances:
+
+
+
 
     return [0,1,2,3,4]
 
