@@ -38,9 +38,6 @@ class Solve_greedy_2opt:
     # greedyな解き方で訪れる順番を求める。このとき、各移動の経路長も保存し、順番とともに返す
     def greedy(self):
 
-        # city間の移動を表すmapping 3 -> 5 -> 1 なら、{3: 5, 5: 1}が入る
-        self.next = {}
-
         # 訪れる順番を入れたリスト
         self.order = [0]
 
@@ -68,7 +65,7 @@ class Solve_greedy_2opt:
     
     # a_start, a_goal, b_start, b_goalは座標
     # a_start -> a_goal の線と b_start -> b_goal の線が交差するか判定
-    # 方針：a_start -> a_goalの線分を考え、b_start、b_goalがどっち側にあるかをeval_start, eval_doalの正負で評価
+    # 方針：交差するかを直接判定するのではなく、交差するとして繋ぎかえたときに距離が短くなるかどうかを考える
     def isCross(self, a_start, a_goal, b_start, b_goal) -> bool:
 
         if self.calc_distance(a_start, a_goal) + self.calc_distance(b_start, b_goal) > self.calc_distance(a_start, b_start) + self.calc_distance(a_goal, b_goal):
