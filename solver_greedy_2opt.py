@@ -39,7 +39,10 @@ class Solve_greedy_2opt:
     def greedy(self):
 
         # city間の移動を表すmapping 3 -> 5 -> 1 なら、{3: 5, 5: 1}が入る
-        self.order = {}
+        self.next = {}
+
+        # 訪れる順番を入れたリスト
+        self.order = [0]
 
         # 【2optのための変更点】そのcityから次のcityまでの経路を保存するmapping
         self.distances = {}
@@ -47,7 +50,7 @@ class Solve_greedy_2opt:
         # cities[cirrent_index]を今見ているということ
         current_index = 0
 
-        unvisitted_ids = [i for i in range(len(cities))]
+        unvisitted_ids = [i for i in range(len(self.cities))]
 
         while len(unvisitted_ids) > 1:
 
@@ -56,10 +59,11 @@ class Solve_greedy_2opt:
             
             min_distance, next_index = self.find_nearest_city(current_index, unvisitted_ids)
             
-            # 最短経路の長さをdistaicesに保存、orderに入れ、current_indexを更新する
+            # 最短経路の長さをdistaicesに保存、nextに入れ、current_indexを更新する
             self.distances[current_index] = min_distance
-            self.order[current_index] = next_index
+            self.next[current_index] = next_index
             current_index = next_index
+            self.order.append(current_index)
 
     
     # a_start, a_goal, b_start, b_goalは座標
@@ -67,75 +71,42 @@ class Solve_greedy_2opt:
     # 方針：a_start -> a_goalの線分を考え、b_start、b_goalがどっち側にあるかをeval_start, eval_doalの正負で評価
     def isCross(self, a_start, a_goal, b_start, b_goal) -> bool:
 
-        # a_start -> a_goalの線文が満たす、方程式 y = ax + bの係数a, bを求める
-        # a_startのx座標 == a_goalのx座標　の時、傾き存在しないので別枠で考える
-        if a_start[0] == a_goal[0]:
-            eval_start = b_start[0] - a_start[0]
-            eval_goal = b_goal[0] - a_start[0]
-
-        else:
-            a = (a_start[1] - a_goal[1]) / (a_start[0] - a_goal[0])
-            b = (a_start[0]*a_goal[1] - a_start[1]*a_goal[0]) / (a_start[0] - a_goal[0])
-
-            # y - ax - bの正負で評価
-            eval_start = b_start[1] - a * b_start[0] - b
-            eval_goal = b_goal[1] - a * b_goal[0] - b
-
-        if eval_start * eval_goal <= 0:
+        if self.calc_distance(a_start, a_goal) + self.calc_distance(b_start, b_goal) > self.calc_distance(a_start, b_start) + self.calc_distance(a_goal, b_goal):
             return True
         else:
             return False
         
-    def hasCross(self, city_id):
-        
-        # クロスする候補
-        candidate = [i for i in range(len(self.cities))]
-        candidate.remove(city_id)
-
-        for id in candidate:
-            if self.isCross(self.cities[city_id], self.cities[self.order[city_id]], self.cities[id], self.cities[self.order[id]]):
-                return True
-        
-        return False
 
     def greedy_2opt(self):
         # ここがメイン
         # greedyの欠点は、残り少なくなってきた終盤で、大きくジャンプをしてしまい別の移動経路と交差すること。
-        greedy_result, distances = self.greedy(self.cities)
-        print(greedy_result, distances)
-        sorted_distances = dict(sorted(distances.items(), key = lambda item:item[1], reverse = True))
-
-        # 全ての経路について交差を判定し付け替えをするのは計算量が膨大(最悪計算量O(N^2)?)
-        # そこで上位から見ていき、交差しない経路を見つけたらそこで交差探索を終了する(これも計算量自体はO(N^2)?)
+        self.greedy()
         
-        for id in sorted_distances[:5]:
+        # 全ての経路について交差を判定し付け替えをするのは計算量が膨大(最悪計算量O(N^2))なので、最大10回のみにする
+        # count = 0
 
-            # id から出る線が、他とクロスするかどうかを判定
-            # クロスするなら、id と、order[id](idの次に訪れることになってるcity)を、それぞれ一番近くのcityに結びつける
-            # idから最も近いcity をcityAとして、現在cityA -> cityBに移動してるとすると、その間にidを入れてcityA -> id -> cityBにするということ
-            if self.hasCross(id):
+        # 一回の更新で、変わったかどうか。何も変わらなかったらそこでループを抜ける
+        change = True
+        
+        # while count < 10:
+        while change:
 
-                old_nextID = self.order[id]
+            # 何も変わらなかった時のために最初はFalseにする
+            change = False
+            for i in range(len(self.cities) - 1):
 
-                # まずはid側を繋ぎかえる
-                cityA = self.find_nearest_city(id)
-                cityB = self.order[cityA]
+                for j in range(i + 1, len(self.cities) - 1):
 
-                self.order[cityA] = id
-                self.order[id] = cityB
+                    if self.isCross(self.cities[self.order[i]], self.cities[self.order[i + 1]],self.cities[self.order[j]], self.cities[self.order[j + 1]]):
+                            self.order = self.order[:i + 1] + self.order[i+1: j+1][::-1] + self.order[j+1 :]
+                            change = True
 
-                # 次にold_nextID側を繋ぎかえる
-                cityA = self.find_nearest_city(old_nextID)
-                cityB = self.order[cityA]
+            # count += 1
+        
 
-                self.order[cityA] = old_nextID
-                self.order[id] = cityB
+
+
     
-
-
-
-
-
 
 if __name__ == '__main__':
     assert len(sys.argv) > 1
@@ -143,14 +114,7 @@ if __name__ == '__main__':
     s.greedy_2opt()
 
 
-    tour = [0]
-    index = 0
+    tour = s.order
+    
 
-    while True:
-        if s.order[index] != None:
-            tour.append(s.order[index])
-            index = s.order[index]
-        else:
-            break
-        
     print_tour(tour)
