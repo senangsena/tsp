@@ -68,12 +68,12 @@ class Solve_greedy_2opt:
     def calc_distance(self, start, goal):
         return math.sqrt((start[0] - goal[0])**2 + (start[1] - goal[1])**2)
     
-    # inthisAreaの中で、city_idに最も近いcityのidを返す
-    def find_nearest_city(self, city_id: int, unvisitted_ids: list[int]) -> int:
+    # まだ訪れていないcityの中で、city_idに最も近いcityのidを返す
+    def find_nearest_city(self, city_id: int, unvisited_ids: list[int]) -> int:
         # 最短距離を入れるmin_distance
         min_distance = float('inf')
 
-        for candidate_id in unvisitted_ids: 
+        for candidate_id in unvisited_ids: 
 
             # 2点間の距離を計算
             d = self.calc_distance(self.cities[city_id], self.cities[candidate_id])
@@ -83,37 +83,29 @@ class Solve_greedy_2opt:
                 min_distance = d
                 next_index = candidate_id # ここに最後に入っているindexが次に進むcityのindex
 
-        # 最短距離と、移動先のcityのidを返す
-        return min_distance, next_index
+        # 最も近いcityのidを返す
+        return next_index
         
     
-    # greedyな解き方で訪れる順番を求める。このとき、各移動の経路長も保存し、順番とともに返す
+    # greedyな解き方で訪れる順番を求める。このとき、移動の順番を表すself.orderを作る
     def greedy(self):
-
-        # city間の移動を表すmapping 3 -> 5 -> 1 なら、{3: 5, 5: 1}が入る
-        self.next = {}
 
         # 訪れる順番を入れたリスト
         self.order = [0]
 
-        # 【2optのための変更点】そのcityから次のcityまでの経路を保存するmapping
-        self.distances = {}
-
         # cities[cirrent_index]を今見ているということ
         current_index = 0
 
-        unvisitted_ids = [i for i in range(len(self.cities))]
+        unvisited_ids = [i for i in range(len(self.cities))]
 
-        while len(unvisitted_ids) > 1:
+        while len(unvisited_ids) > 1:
 
             # 未訪問のcityリスト。自分自身にいくことはできないので取り除く
-            unvisitted_ids.remove(current_index)
+            unvisited_ids.remove(current_index)
             
-            min_distance, next_index = self.find_nearest_city(current_index, unvisitted_ids)
+            next_index = self.find_nearest_city(current_index, unvisited_ids)
             
-            # 最短経路の長さをdistaicesに保存、nextに入れ、current_indexを更新する
-            self.distances[current_index] = min_distance
-            self.next[current_index] = next_index
+            # current_indexを更新する
             current_index = next_index
             self.order.append(current_index)
 
@@ -133,41 +125,31 @@ class Solve_greedy_2opt:
         # ここがメイン
         # greedyの欠点は、残り少なくなってきた終盤で、大きくジャンプをしてしまい別の移動経路と交差すること。
         self.greedy()
-        
-        # 全ての経路について交差を判定し付け替えをするのは計算量が膨大(最悪計算量O(N^2))なので、最大10回のみにする
-        # count = 0
 
         # 一回の更新で、変わったかどうか。何も変わらなかったらそこでループを抜ける
         change = True
         
-        # while count < 10:
         while change:
 
             # 何も変わらなかった時のために最初はFalseにする
             change = False
             for i in range(len(self.cities) - 1):
 
-                for j in range(i + 1, len(self.cities) - 1):
+                # order[i]と、order[j]を比較するイメージ。隣り合う辺は比較する必要ないのでi + 2から始める
+                for j in range(i + 2, len(self.cities) - 1):
 
                     if self.isCross(self.cities[self.order[i]], self.cities[self.order[i + 1]],self.cities[self.order[j]], self.cities[self.order[j + 1]]):
                             self.order = self.order[:i + 1] + self.order[i+1: j+1][::-1] + self.order[j+1 :]
                             change = True
-
-            # count += 1
-        
-
-
-
-    
+  
 
 if __name__ == '__main__':
     assert len(sys.argv) > 1
     s = Solve_greedy_2opt(read_input(sys.argv[1]))
     s.greedy_2opt()
 
-
     tour = s.order
-    
 
     print_tour(tour)
+
 ```
