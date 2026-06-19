@@ -120,7 +120,7 @@ class Solve_greedy_2opt:
     
     # a_start, a_goal, b_start, b_goalは座標
     # a_start -> a_goal の線と b_start -> b_goal の線が交差するか判定
-    # 方針：a_start -> a_goalの線分を考え、b_start、b_goalがどっち側にあるかをeval_start, eval_doalの正負で評価
+    # 方針：交差するかを直接判定するのではなく、交差するとして繋ぎかえたときに距離が短くなるかどうかを考える
     def isCross(self, a_start, a_goal, b_start, b_goal) -> bool:
 
         if self.calc_distance(a_start, a_goal) + self.calc_distance(b_start, b_goal) > self.calc_distance(a_start, b_start) + self.calc_distance(a_goal, b_goal):
@@ -135,18 +135,25 @@ class Solve_greedy_2opt:
         self.greedy()
         
         # 全ての経路について交差を判定し付け替えをするのは計算量が膨大(最悪計算量O(N^2))なので、最大10回のみにする
-        count = 0
+        # count = 0
+
+        # 一回の更新で、変わったかどうか。何も変わらなかったらそこでループを抜ける
+        change = True
         
-        while count < 10:
+        # while count < 10:
+        while change:
+
+            # 何も変わらなかった時のために最初はFalseにする
+            change = False
             for i in range(len(self.cities) - 1):
 
                 for j in range(i + 1, len(self.cities) - 1):
 
                     if self.isCross(self.cities[self.order[i]], self.cities[self.order[i + 1]],self.cities[self.order[j]], self.cities[self.order[j + 1]]):
                             self.order = self.order[:i + 1] + self.order[i+1: j+1][::-1] + self.order[j+1 :]
+                            change = True
 
-            count += 1             
-
+            # count += 1
         
 
 
@@ -164,5 +171,3 @@ if __name__ == '__main__':
 
     print_tour(tour)
 ```
-    
-    
