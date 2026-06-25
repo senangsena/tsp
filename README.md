@@ -1,15 +1,70 @@
 # TSP
-## プログラム
+## ヒューリスティクス
+* ⭐️**solver_or_opt.py**  
+    greedy + 2opt + or-opt  
+    任意の2つのノードを、別のノードとノードの間に繋ぎかえることを考える、Orーoptを実装した
+* **solver_greedy_2opt.py**  
+    貪欲法+2opt  
+    交差する経路を繋ぎかえることで経路長を短縮する  
+
+ヒューリスティクスなし
 * **solver_random.py** 
     入力の順番通りに進む
-* **solver_greedy.py**
+* **solver_greedy.py**  
     貪欲法の実装  
     常に、そこから最も近いcityに進む
-* **solver_greedy_2opt.py**
-    貪欲法+2opt  
-    交差する経路を繋ぎかえることで経路長を短縮する
+
 
 ## 結果
+greedy + 2-opt + Or-optの結果  
+sample/sa は焼きなまし法の結果 
+* challenge 0 ~ 5では、 焼きなまし法の方が短い距離を見つけることができるが、challenge 6で逆転　
+* or-optは都市が多いほど効果が出る
+* 小〜中規模なら焼きなまし法が強い
+
+→ 現在の、or-optに、焼きなまし法を追加すればより良さそう
+
+```
+sena@SenanoMacBook-Air google-step-tsp % python3 output_verifier.py               
+Challenge 0
+output          :    3418.10
+sample/random   :    3862.20
+sample/sa       :    3291.62
+
+Challenge 1
+output          :    3832.29
+sample/random   :    6101.57
+sample/sa       :    3778.72
+
+Challenge 2
+output          :    5232.96
+sample/random   :   13479.25
+sample/sa       :    4494.42
+
+Challenge 3
+output          :    9261.01
+sample/random   :   47521.08
+sample/sa       :    8150.91
+
+Challenge 4
+output          :   11434.32
+sample/random   :   92719.14
+sample/sa       :   10675.29
+
+Challenge 5
+output          :   22314.05
+sample/random   :  347392.97
+sample/sa       :   21119.55
+
+Challenge 6
+output          :   43175.38
+sample/random   : 1374393.14
+sample/sa       :   44393.89
+
+Challenge 7
+output          :   83165.58
+```
+
 ```
 (tsp) sena@SenanoMacBook-Air google-step-tsp % python3 output_verifier.py 
 Challenge 0
