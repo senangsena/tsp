@@ -14,6 +14,114 @@
     貪欲法の実装  
     常に、そこから最も近いcityに進む
 
+## プログラム
+* greedy
+``` python
+    def greedy(self):
+
+        # 訪れる順番を入れたリスト
+        self.order = [0]
+
+        # cities[cirrent_index]を今見ているということ
+        current_index = 0
+
+        unvisited_ids = [i for i in range(len(self.cities))]
+
+        while len(unvisited_ids) > 1:
+
+            # 未訪問のcityリスト。自分自身にいくことはできないので取り除く
+            unvisited_ids.remove(current_index)
+            
+            next_index = self.find_nearest_city(current_index, unvisited_ids)
+            
+            # current_indexを更新する
+            current_index = next_index
+            self.order.append(current_index)
+```
+* 2-opt
+``` python 
+def greedy_2opt(self):
+        # greedyの欠点は、残り少なくなってきた終盤で、大きくジャンプをしてしまい別の移動経路と交差すること。
+        self.greedy()
+
+        # 一回の更新で、変わったかどうか。何も変わらなかったらそこでループを抜ける
+        change = True
+        
+        while change:
+
+            # 何も変わらなかった時のために最初はFalseにする
+            change = False
+            for i in range(len(self.cities) - 1):
+
+                # order[i]と、order[j]を比較するイメージ。隣り合う辺は比較する必要ないのでi + 2から始める
+                for j in range(i + 2, len(self.cities) - 1):
+
+                    if self.isCross(self.cities[self.order[i]], self.cities[self.order[i + 1]],self.cities[self.order[j]], self.cities[self.order[j + 1]]):
+                            self.order = self.order[:i + 1] + self.order[i+1: j+1][::-1] + self.order[j+1 :]
+                            change = True
+
+```
+* or-opt
+``` python
+   def greedy_2opt_oropt(self):
+
+        self.greedy_2opt()
+
+        change = True
+
+        while change:
+
+            change = False
+
+            # 4つのノードA,B,C,Dの、A-BとC-Dを切って、他と繋げたらもっと短くならないか確かめる
+            for i in range(len(self.cities) - 3):
+
+                distanceAB = self.calc_distance(self.cities[self.order[i]], self.cities[self.order[i + 1]])
+                distanceCD = self.calc_distance(self.cities[self.order[i + 2]], self.cities[self.order[i + 3]])
+                distanceAD = self.calc_distance(self.cities[self.order[i]], self.cities[self.order[i + 3]])
+
+                # 付け替えた時に減る長さ
+                minus_d = distanceAB + distanceCD - distanceAD
+
+                # 付け替えた時に増える長さの最小値とその時のindex
+                min_add_d = float('inf')
+                min_add_i = i
+
+                # 別の部分の、E,Fの間に入れた時と比較する
+                for j in range(len(self.cities) - 1):
+
+                    if i <= j and (j <= i + 2):
+                        continue
+
+                    distanceEF = self.calc_distance(self.cities[self.order[j]], self.cities[self.order[j + 1]])
+                    distanceBF = self.calc_distance(self.cities[self.order[i + 1]], self.cities[self.order[j + 1]])
+    
+                    distanceCE = self.calc_distance(self.cities[self.order[i + 2]], self.cities[self.order[j]])
+
+                    add_d = distanceCE + distanceBF - distanceEF
+
+                    if add_d < minus_d and (add_d < min_add_d):
+                        min_add_d = add_d
+                        min_add_i = j
+                
+                # 更新されているなら
+                if min_add_i != i:
+                    change = True
+                
+                    nodes = self.order[i+1 : i+3] 
+                    
+                    if i < min_add_i:
+                        # iの方が先: [最初〜A] + [D〜E] + [C, B] + [F〜最後]
+                        self.order = self.order[:i+1] + self.order[i+3 : min_add_i+1] + nodes[::-1] + self.order[min_add_i+1:]
+                    else:
+                        # jの方が先: [最初〜E] + [C, B] + [F〜A] + [D〜最後]
+                        self.order = self.order[:min_add_i+1] + nodes[::-1] + self.order[min_add_i+1 : i+1] + self.order[i+3:]
+                    
+                    # 一度のループで変更は一回のみ
+                    break
+
+```
+
 
 ## 結果
 greedy + 2-opt + Or-optの結果  
