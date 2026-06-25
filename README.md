@@ -31,7 +31,7 @@
 
             # 未訪問のcityリスト。自分自身にいくことはできないので取り除く
             unvisited_ids.remove(current_index)
-            
+            # find_nearest_cityは、まだ訪れていないcityの中で、city_idに最も近いcityのidを返す
             next_index = self.find_nearest_city(current_index, unvisited_ids)
             
             # current_indexを更新する
